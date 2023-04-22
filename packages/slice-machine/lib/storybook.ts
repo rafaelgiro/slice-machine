@@ -49,7 +49,8 @@ export default {
     cwd: string,
     libraryName: string,
     sliceName: string,
-    sliceModel: SliceSM
+    sliceModel: SliceSM,
+    mock?: ComponentMocks
   ): void {
     if (
       Files.exists(
@@ -61,14 +62,13 @@ export default {
 
     const mocksPath = sliceMockPath(cwd, libraryName, sliceName);
 
-    const mocks = Files.readEntity<ComponentMocks>(
-      mocksPath,
-      (payload: unknown) => {
+    const mocks =
+      mock ??
+      Files.readEntity<ComponentMocks>(mocksPath, (payload: unknown) => {
         return getOrElseW(() => new Error("Invalid SharedSlice mocks"))(
           ComponentMocks.decode(payload)
         );
-      }
-    );
+      });
 
     if (!mocks || mocks instanceof Error) {
       console.error(`No mocks available, cannot generate stories`);

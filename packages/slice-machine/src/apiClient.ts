@@ -14,7 +14,7 @@ import {
   ScreenshotResponse,
 } from "../lib/models/common/Screenshots";
 import { ComponentUI, ScreenshotUI } from "@lib/models/common/ComponentUI";
-import { ComponentMocks } from "@slicemachine/core/build/models";
+import { ComponentMocks, SliceSM } from "@slicemachine/core/build/models";
 import { PackageChangelog } from "@lib/models/common/versions";
 import {
   InvalidCustomTypeResponse,
@@ -165,9 +165,9 @@ export const checkSimulatorSetup = (): Promise<
 > => axios.get(`/api/simulator/check`);
 
 export type SaveSliceMockRequest = {
-  sliceName: string;
   libraryName: string;
   mock: ComponentMocks;
+  model: SliceSM;
 };
 
 export const saveSliceMock = (payload: SaveSliceMockRequest) =>

@@ -21,7 +21,12 @@ describe("save-mock", () => {
     const sliceName = "MySlice";
     const payload: SaveMockBody = {
       libraryName: library,
-      sliceName,
+      model: {
+        id: "slice-id",
+        name: sliceName,
+        type: "SharedSlice",
+        variations: [],
+      },
       mock: [],
     };
     vol.fromJSON({}, TMP);
@@ -32,7 +37,7 @@ describe("save-mock", () => {
 
     saveSliceMock(
       {
-        env: { cwd: TMP },
+        env: { cwd: TMP, framework: "none" },
         body: payload,
       },
       fakeRes
@@ -58,15 +63,21 @@ describe("save-mock", () => {
       end: jest.fn(),
       json: jest.fn(),
     } as unknown as Response;
+    const payload: SaveMockBody = {
+      libraryName: library,
+      model: {
+        id: "slice-id",
+        name: sliceName,
+        type: "SharedSlice",
+        variations: [],
+      },
+      mock: content,
+    };
 
     saveSliceMock(
       {
-        env: { cwd: TMP },
-        body: {
-          libraryName: library,
-          sliceName,
-          mock: content,
-        },
+        env: { cwd: TMP, framework: "none" },
+        body: payload,
       },
       fakeRes
     );

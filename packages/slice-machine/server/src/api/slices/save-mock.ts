@@ -1,23 +1,44 @@
-import { ComponentMocks } from "@slicemachine/core/build/models";
+/** global variable define in server/src/index.js **/
+declare let appRoot: string;
+import {
+  ComponentMocks,
+  SliceSM,
+  Frameworks,
+  FrameworksC,
+} from "@slicemachine/core/build/models";
 import { sliceMockPath } from "@slicemachine/core/build/node-utils";
 import { Files } from "@slicemachine/core/build/node-utils";
 import * as t from "io-ts";
 import { Response } from "express";
 import { fold } from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
+import Storybook from "../../../../lib/storybook";
 
 function saveSliceMockToFileSystem(
   cwd: string,
+  framework: Frameworks,
+  model: SliceSM,
   libraryName: string,
-  sliceName: string,
   mock: ComponentMocks
 ) {
-  const path = sliceMockPath(cwd, libraryName, sliceName);
+  const path = sliceMockPath(cwd, libraryName, model.name);
+
+  console.log("[slice/save-mock]: Generating stories");
+  Storybook.generateStories(
+    appRoot,
+    framework,
+    cwd,
+    libraryName,
+    model.name,
+    model,
+    mock
+  );
+
   return Files.writeJson(path, mock);
 }
 
 export const SaveMockBody = t.strict({
-  sliceName: t.string,
+  model: SliceSM,
   libraryName: t.string,
   mock: ComponentMocks,
 });
@@ -25,7 +46,7 @@ export const SaveMockBody = t.strict({
 export type SaveMockBody = t.TypeOf<typeof SaveMockBody>;
 
 const SaveMockRequest = t.strict({
-  env: t.strict({ cwd: t.string }),
+  env: t.strict({ cwd: t.string, framework: FrameworksC }),
   body: SaveMockBody,
 });
 
@@ -42,8 +63,9 @@ export default function handler(req: SaveMockRequest, res: Response) {
       ({ body, env }) => {
         saveSliceMockToFileSystem(
           env.cwd,
+          env.framework as Frameworks,
+          body.model,
           body.libraryName,
-          body.sliceName,
           body.mock
         );
         res.json(body);
